@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation=
+               "http://www.springframework.org/schema/beans
+               http://www.springframework.org/schema/beans/spring-beans.xsd
+               http://www.springframework.org/schema/context
+               http://www.springframework.org/schema/context/spring-context.xsd
+               ">
+    <!--  无参构造方法实例化  -->
+    <bean id="userDao" class="dao.impl.UserDaoImpl"/>
+
+    <!--  工厂静态方法实例化 -->
+    <bean id="userDao4StaticFactory" class="dao.factory.UserDaoStaticFactory" factory-method="createUserDao"/>
+
+    <!--  工厂实例方法实例化  -->
+    <bean id="UserDaoDynamicFactory" class="dao.factory.UserDaoDynamicFactory"/>
+
+    <bean id="userDao4DynamicFactory" factory-bean="UserDaoDynamicFactory" factory-method="createUserDao"/>
+    <!--  构造方法入住  -->
+    <bean id="userService" class="service.impl.UserServiceImpl">
+        <constructor-arg name="userDao" ref="userDao"/>
+    </bean>
+    <!--  set 注入  -->
+    <bean id="userService2" class="service.impl.UserServiceImpl2">
+        <property name="userDao" ref="userDao"/>
+    </bean>
+
+    <bean id="userService" class="service.impl.UserServiceImpl2" p:userDao-ref="userDao"/>
+    <!--  基础数据类型注入  -->
+    <bean id="basicDI" class="dao.impl.BasicDI">
+        <property name="username" value="zhangsan"/>
+        <property name="age" value="12"/>
+    </bean>
+
+    <!--  List 注入  -->
+    <bean id="listDI" class="dao.impl.ListDI">
+        <property name="strList">
+            <list>
+                <value>abc</value>
+                <value>def</value>
+                <value>ghi</value>
+            </list>
+        </property>
+    </bean>
+    <!--   Map 注入  -->
+    <bean id="u1" class="pojo.User"/>
+    <bean id="u2" class="pojo.User"/>
+    <bean id="mapDI" class="dao.impl.MapDI">
+        <property name="userMap">
+            <map>
+                <entry key="user1" value-ref="u1"/>
+                <entry key="user2" value-ref="u2"/>
+
+            </map>
+        </property>
+    </bean>
+
+    <!--  properties 注入  -->
+    <bean id="propertiesDI" class="dao.impl.PropertiesDI">
+        <property name="properties">
+            <props>
+                <prop key="p1">value1</prop>
+                <prop key="p2">value2</prop>
+                <prop key="p3">value3</prop>
+            </props>
+        </property>
+    </bean>
+    <!--  映入其他配置文件  -->
+    <import resource="applicationContext-xxx.xml"/>
+
+<!--  引入 jdbc.properties  -->
+    <context:property-placeholder location="jdbc.properties"/>
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driver}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+</beans>
