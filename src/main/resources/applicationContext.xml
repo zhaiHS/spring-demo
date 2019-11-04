@@ -10,33 +10,37 @@
                http://www.springframework.org/schema/context/spring-context.xsd
                ">
     <!--  无参构造方法实例化  -->
-    <bean id="userDao" class="dao.impl.UserDaoImpl"/>
+    <bean id="user" class="pojo.User"/>
 
     <!--  工厂静态方法实例化 -->
-    <bean id="userDao4StaticFactory" class="dao.factory.UserDaoStaticFactory" factory-method="createUserDao"/>
+    <bean id="user4StaticFactory" class="instantiation.UserStaticFactory" factory-method="createUser"/>
 
     <!--  工厂实例方法实例化  -->
-    <bean id="UserDaoDynamicFactory" class="dao.factory.UserDaoDynamicFactory"/>
+    <bean id="userDynamicFactory" class="instantiation.UserDynamicFactory"/>
 
-    <bean id="userDao4DynamicFactory" factory-bean="UserDaoDynamicFactory" factory-method="createUserDao"/>
-    <!--  构造方法入住  -->
-    <bean id="userService" class="service.impl.UserServiceImpl">
-        <constructor-arg name="userDao" ref="userDao"/>
+    <bean id="user4DynamicFactory" factory-bean="userDynamicFactory" factory-method="createUser"/>
+    <!--  构造方法 注入  -->
+    <bean id="user4Constructor" class="pojo.User">
+        <constructor-arg name="name" value="name"/>
+        <constructor-arg name="age" value="22"/>
+        <constructor-arg name="createMethod" value="constructor DI"/>
     </bean>
     <!--  set 注入  -->
-    <bean id="userService2" class="service.impl.UserServiceImpl2">
-        <property name="userDao" ref="userDao"/>
+    <bean id="user4Set" class="pojo.User">
+        <property name="name" value="name"/>
+        <property name="age" value="22"/>
+        <property name="createMethod" value="set DI"/>
     </bean>
-
-    <bean id="userService" class="service.impl.UserServiceImpl2" p:userDao-ref="userDao"/>
+    <!--  p标签  -->
+    <bean id="user4p" class="pojo.User" p:name="name" p:age="22" p:createMethod="tag p DI" />
     <!--  基础数据类型注入  -->
-    <bean id="basicDI" class="dao.impl.BasicDI">
+    <bean id="basicDI" class="di.BasicDI">
         <property name="username" value="zhangsan"/>
         <property name="age" value="12"/>
     </bean>
 
     <!--  List 注入  -->
-    <bean id="listDI" class="dao.impl.ListDI">
+    <bean id="listDI" class="di.ListDI">
         <property name="strList">
             <list>
                 <value>abc</value>
@@ -48,7 +52,7 @@
     <!--   Map 注入  -->
     <bean id="u1" class="pojo.User"/>
     <bean id="u2" class="pojo.User"/>
-    <bean id="mapDI" class="dao.impl.MapDI">
+    <bean id="mapDI" class="di.MapDI">
         <property name="userMap">
             <map>
                 <entry key="user1" value-ref="u1"/>
@@ -59,7 +63,7 @@
     </bean>
 
     <!--  properties 注入  -->
-    <bean id="propertiesDI" class="dao.impl.PropertiesDI">
+    <bean id="propertiesDI" class="di.PropertiesDI">
         <property name="properties">
             <props>
                 <prop key="p1">value1</prop>
@@ -71,7 +75,7 @@
     <!--  映入其他配置文件  -->
     <import resource="applicationContext-xxx.xml"/>
 
-<!--  引入 jdbc.properties  -->
+    <!--  引入 jdbc.properties  -->
     <context:property-placeholder location="jdbc.properties"/>
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
         <property name="driverClass" value="${jdbc.driver}"/>

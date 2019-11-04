@@ -1,4 +1,4 @@
-package dao.impl;
+package di;
 
 import pojo.User;
 

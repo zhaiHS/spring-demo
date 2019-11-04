@@ -3,7 +3,7 @@ my spring demo
 
 ## 1. spring 体系结构
 
-![spring 体系结构](spring.png)
+![spring 体系结构](img/spring.png)
 
 
 
@@ -37,7 +37,7 @@ my spring demo
 - class：Bean 的全限定名称
 
     ```xml
-     <bean id="userDao" class="dao.impl.UserDaoImpl" />
+     <bean id="user" class="pojo.User"/>
     ```
 
 
@@ -67,60 +67,60 @@ destroy-method：指定类中的销毁方法名称
     它会根据默认无参构造方法创建对象，如果bean中没有默认无参构造方法，将会创建失败
 
     ```xml
-     <bean id="userDao" class="dao.impl.UserDaoImpl" />
+     <bean id="user" class="pojo.User"/>
     ```
 
     
 
 - 工厂静态方法实例化
 
-    UserDaoStaticFactory.java
+    UserStaticFactory.java
 
     ```java
-    package dao.factory;
+    package instantiation;
     
-    import dao.UserDao;
-    import dao.impl.UserDaoImpl;
+    import pojo.User;
     
-    public class UserDaoStaticFactory {
-        public static UserDao createUserDao() {
-            return new UserDaoImpl();
+    public class UserStaticFactory {
+        public static User createUser() {
+            return  new User("static factory instantitation");
         }
     }
+    
     
     ```
 
     配置文件
 
     ```xml
-    <bean id="userDao4Factory" class="dao.factory.UserDaoStaticFactory" factory-method="createUserDao" />
+    <bean id="user4StaticFactory" class="instantiation.UserStaticFactory" factory-method="createUser"/>
     ```
 
 - 工厂实例方法实例化
 
-    UserDaoDynamicFactory.java
+    UserDynamicFactory.java
 
     ```java
-    package dao.factory;
+    package instantiation;
     
-    import dao.UserDao;
-    import dao.impl.UserDaoImpl;
+    import pojo.User;
     
-    public class UserDaoDynamicFactory {
-        public UserDao createUserDao() {
-            return new UserDaoImpl();
+    public class UserDynamicFactory {
+        public User createUser() {
+            return new User("dynamic factory method instantiation");
         }
     }
-    
     ```
-
+    
     
 
     配置文件
 
     ```xml
-    <bean id="UserDaoDynamicFactory" class="dao.factory.UserDaoDynamicFactory"/>
-    <bean id="userDao4DynamicFactory" factory-bean="UserDaoDynamicFactory" factory-method="createUserDao" />
+<bean id="userDynamicFactory" class="instantiation.UserDynamicFactory"/>
+    
+    <bean id="user4DynamicFactory" factory-bean="userDynamicFactory" factory-method="createUser"/>
+    
     ```
 
 ### 2.5 依赖注入（Dependency injection）
@@ -129,75 +129,103 @@ destroy-method：指定类中的销毁方法名称
 
 - 方式
 
-    - 构造方法
+    User.java
 
-        UserServiceImpl.java
-
-        ```java
-        package service.impl;
-        
-        import dao.UserDao;
-        import service.UserService;
-        
-        public class UserServiceImpl implements UserService {
-        
-            private UserDao userDao;
-        
-            public UserServiceImpl(UserDao userDao) {
-                this.userDao = userDao;
-            }
-        
+    ```java
+    package pojo;
+    
+    public class User {
+        private String createMethod;
+        private String name;
+        private Integer age;
+    
+        public User(String name, Integer age,String createMethod) {
+            this.name = name;
+            this.age = age;
+            this.createMethod = createMethod;
         }
-        
-        
-        ```
+    
+        public User() {
+            this.createMethod = "No Arguments instantiation";
+        }
+    
+        public User(String method) {
+            this.createMethod = method;
+        }
+    
+        public String getName() {
+            return name;
+        }
+    
+        public void setName(String name) {
+            this.name = name;
+        }
+    
+        public String getCreateMethod() {
+            return createMethod;
+        }
+    
+        public void setCreateMethod(String createMethod) {
+            this.createMethod = createMethod;
+        }
+    
+        public Integer getAge() {
+            return age;
+        }
+    
+        public void setAge(Integer age) {
+            this.age = age;
+        }
+    
+        @Override
+        public String toString() {
+            return "User{" +
+                    "createMethod='" + createMethod + '\'' +
+                    ", name='" + name + '\'' +
+                    ", age=" + age +
+                    '}';
+        }
+    }
+    
+    
+    
+    ```
+
+    - 构造方法注入
 
         配置文件
 
         ```xml
-        <bean id="userService" class="service.impl.UserServiceImpl">
-            <constructor-arg name="userDao" ref="userDao" />
+        <bean id="user4Constructor" class="pojo.User">
+            <constructor-arg name="name" value="name"/>
+            <constructor-arg name="age" value="22"/>
+            <constructor-arg name="createMethod" value="constructor DI"/>
         </bean>
         ```
+
+        
 
     - set方法
 
-        UserServiceImpl2.java
-
-        ```java
-        package service.impl;
-        
-        import dao.UserDao;
-        import service.UserService;
-        
-        public class UserServiceImpl2 implements UserService {
-            private UserDao userDao;
-        
-            public void setUserDao(UserDao userDao) {
-                this.userDao = userDao;
-            }
-        
-        }
-        
-        ```
-
         配置文件
 
         ```xml
-        <bean id="userService2" class="service.impl.UserServiceImpl2">
-            <property name="userDao" ref="userDao"/>
+        <bean id="user4Set" class="pojo.User">
+            <property name="name" value="name"/>
+            <property name="age" value="22"/>
+            <property name="createMethod" value="set DI"/>
         </bean>
         ```
-
+        
         p 命名空间注入
-
+        
         p命名空间注入本质也是set方法注入，但比较上述的set方法注入更加方便。
-
+        
         引入命名空间
-
+        
         ```xml
-        <bean id="userService" class="service.impl.UserServiceImpl2" p:userDao-ref="userDao"/>
-        ```
+        <bean id="user4p" class="pojo.User" p:name="name" p:age="22" p:createMethod="tag p DI" />
+    ```
 
 - 不同数据类型的注入
 
@@ -420,4 +448,40 @@ destroy-method：指定类中的销毁方法名称
         </bean>
         ```
 
-        
+
+
+
+## 3. ApplicationContext
+
+接口类型，代表应用上下文，可以通过其实例获得Spring容器中的Bean对象
+
+### 3.1 ApplicationContext 实现类
+
+- ClassPathXmlApplicationContext
+
+    它是从类的根路径下加载配置文件
+
+- FileSystemXmlApplicationContext
+
+    它是从磁盘路径上加载配置文件，配置文件可以在磁盘的任意位置
+
+- AnnotationConfigApplicationContext
+
+    当使用注解配置容器时，需要使用此类来创建 spring 容器，用来读取注解
+
+### 3.2 getBean() 方法使用
+
+```java
+public Object getBean(String name) throws BeanException {
+    assertBeanFactoryActive();
+    return getBeanFactory(),getBean(name);
+}
+
+public <T> T getBean(Class<T> requiredType) throws BeanException {
+    assertBeanFactoryActive();
+    return getBeanFactory().getBean(requiredType);
+}
+```
+
+当参数类型是字符串时，表示根据Bean的id从容器中获得Bean是，返回的是Object，需要强转，当参数的数据类型是Class类型时，表示根据类型从容其中匹配Bean实例，当容器中相同类型的Bean有多个时，则此方法会报错。
+

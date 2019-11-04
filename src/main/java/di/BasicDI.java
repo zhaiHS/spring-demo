@@ -1,4 +1,4 @@
-package dao.impl;
+package di;
 
 
 public class BasicDI {
