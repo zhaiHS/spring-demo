@@ -1,6 +1,6 @@
-package instantiation;
+package ioc.xml.instantiation;
 
-import pojo.User;
+import ioc.xml.pojo.User;
 
 public class UserStaticFactory {
     public static User createUser() {

@@ -1,4 +1,4 @@
-package di;
+package ioc.xml.di;
 
 import java.util.List;
 

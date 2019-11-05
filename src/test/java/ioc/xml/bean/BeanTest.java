@@ -1,18 +1,29 @@
-package bean;
+package ioc.xml.bean;
 
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import di.BasicDI;
-import di.ListDI;
-import di.MapDI;
-import di.PropertiesDI;
+import ioc.xml.di.BasicDI;
+import ioc.xml.di.ListDI;
+import ioc.xml.di.MapDI;
+import ioc.xml.di.PropertiesDI;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import pojo.User;
+import ioc.xml.pojo.User;
+
+import javax.sql.DataSource;
+import java.sql.SQLException;
 
 public class BeanTest {
-    ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
+    ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext-xml.xml");
+
+    @Test
+    public void lifeCycleTest() {
+        User user = (User) applicationContext.getBean("lifeCycleUser");
+        ClassPathXmlApplicationContext app = (ClassPathXmlApplicationContext) this.applicationContext;
+        app.close();
+    }
+
     @Test
     public void noArgumentsInstantiationBeanTest() {
         User bean = (User) applicationContext.getBean("user");
@@ -48,6 +59,7 @@ public class BeanTest {
         User bean = (User) applicationContext.getBean("user4p");
         System.out.println(bean);
     }
+
     @Test
     public void basicDITest() {
         BasicDI bean = applicationContext.getBean(BasicDI.class);
@@ -73,8 +85,8 @@ public class BeanTest {
     }
 
     @Test
-    public void DatasourceTest() {
-        ComboPooledDataSource bean = applicationContext.getBean(ComboPooledDataSource.class);
-        System.out.println(bean);
+    public void DatasourceTest() throws SQLException {
+        DataSource bean = applicationContext.getBean(ComboPooledDataSource.class);
+        System.out.println(bean.getConnection());
     }
 }

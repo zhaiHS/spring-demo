@@ -1,4 +1,4 @@
-package di;
+package ioc.xml.di;
 
 
 public class BasicDI {

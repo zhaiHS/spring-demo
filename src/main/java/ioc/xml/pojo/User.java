@@ -1,11 +1,11 @@
-package pojo;
+package ioc.xml.pojo;
 
 public class User {
     private String createMethod;
     private String name;
     private Integer age;
 
-    public User(String name, Integer age,String createMethod) {
+    public User(String name, Integer age, String createMethod) {
         this.name = name;
         this.age = age;
         this.createMethod = createMethod;
@@ -50,5 +50,13 @@ public class User {
                 ", name='" + name + '\'' +
                 ", age=" + age +
                 '}';
+    }
+
+    public void init() {
+        System.out.println("user bean init");
+    }
+
+    public void destroy() {
+        System.out.println("user bean destroy");
     }
 }

@@ -1,6 +1,6 @@
-package di;
+package ioc.xml.di;
 
-import pojo.User;
+import ioc.xml.pojo.User;
 
 import java.util.Map;
 
