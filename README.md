@@ -675,7 +675,7 @@ public class UserServiceImpl implements UserService {
     
     ```
 
-###3.3 Spring 整合 junit （spring-junit）
+### 3.3 Spring 整合 junit （spring-junit）
 
 在对 spring 进行测试时，每个测试案例都需要创建 ApplicationContext 上下文对象，比较麻烦，而让 spring-junit 负责创建 spring 容器， 只需将配置文件的名称告知，测试Bena就可以在测试类中进行注入
 
