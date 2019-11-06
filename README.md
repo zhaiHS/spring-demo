@@ -1142,3 +1142,149 @@ Spring 的 AOP实现底层就是对以上的动态代理进行了封装，封装
 #### 4.5.3 环绕通知
 
 环绕通知可以传递参数
+
+
+
+```java
+public Object around(ProceedingJoinPoint pjb) throws Throwable {
+    System.out.println("enhance before method");
+    Object proceed = pjb.proceed();    
+    System.out.println("enhance after method");    
+    return proceed;
+}
+```
+
+## 5 声明式事务控制
+
+### 5.1 声明式事务控制
+
+Spring 的声明式事务就是采用声明的方式来处理事务。即在配置文件中声明，用在Spring配置文件中声明式的处理事务来代替代码式的处理事务。
+
+优势：
+
+- 事务管理不侵入开发的组件，具体来说，业务逻辑对象就不会意识到正在事务管理中，因为事务管理式属于系统层面的服务，而不是业务逻辑的一部分，如果想要改变事务管理策划的话，也只需要在自定义文件中重新配置即可
+- 在不需要事务管理的时候，只需要在设定文件上修改，即可移去事务管理服务，无需改变代码重新编译，方便维护
+
+> Spring 声明式事务控制底层就是AOP
+
+
+
+### 5.1 编程式事务控制相关对象
+
+- PlatformTransactionManager
+
+    PlatformTransactionManager接口是spring的事务管理器，它里面提供了我们常用的操作事务的方法
+
+    | 方法                                                         | 说明               |
+    | ------------------------------------------------------------ | ------------------ |
+    | TransactionStatus getTransaction(TransactionDefination defination) | 获取事务的状态信息 |
+    | void commit(TranscationStatus status)                        | 提交事务           |
+    | void rollback(TranscationStatus status)                      | 回滚事务           |
+
+    PlatformTransactionManager 是接口类型，不同的Dao层技术则有不同的实现类，例如：
+
+    当Dao层采用jdbc或mybatis时：org.springframework.jdbc.dataSource.DataSourceTransactionManager
+
+    Dao层技术采用Hibernate时：org.springframwork.orm.HibernateTransactionManager
+
+- TransactionDefinition
+
+    事务定义的信息对象
+
+    | 方法                         | 说明               |
+    | ---------------------------- | ------------------ |
+    | int getIsolationLevel()      | 获得事务的隔离等级 |
+    | int getPropogationBehavior() | 获得事务的传播行为 |
+    | int getTimeout()             | 获得超时时间       |
+    | boolean isReadOnly()         | 是否只读           |
+
+    1. 事务隔离级别
+        - ISOLATION_DEFAULT
+        - ISOLATION_READ_UNCOMMITTED
+        - ISOLATION_READ_COMMITTED
+        - ISOLATION_REPEATABLE_READ
+        - ISOLATION_SERIALIZABLE
+    2. 事务传播级别
+        - REQUIRED：如果当前没有事务，就新建一个事务，如果已存在一个事务中，加入到这个事务中（默认值）
+        - SUPPORTS：支持当前事务，如果当前没有事务，就以非事务方式执行
+        - MANDATORY：使用当前事务，如果当前没有事务，就抛出异常
+        - REQUERS_NEW：新建事务，如果当前在事务中，把当前事务挂起
+        - NOT_SUPPORTED：以非事务方式执行操作，如果当前存在事务，就把当前事务观其
+        - NEVER：以非事务方式运行，如果当前存在事务，抛出异常
+        - NESTED：如果当前存在事务，则在嵌套事务内执行，如果当前没有事务，则执行REQUIRED类似的操作
+        - 超时时间：默认是-1，没有超时限制，如果有，以秒为单位进行设置
+        - 是否只读：建议查询设置为只读
+
+- TransactionStatus
+
+    事务具体的运行状态
+
+    | 方法                       | 说明           |
+    | -------------------------- | -------------- |
+    | boolean hasSavepoint()     | 是否存储回滚点 |
+    | boolean isCompleted()      | 事务是否完成   |
+    | boolean isNewTransaction() | 是否是新事物   |
+    | boolean isRollbackOnly()   | 事务是否回滚   |
+
+### 5.2 声明式事务控制实现
+
+1. XML
+
+    - 引入`tx`命名空间
+
+        ```xml
+        <?xml version="1.0" encoding="UTF-8"?>
+        <beans xmlns="http://www.springframework.org/schema/beans"
+               xmlns:context="http://www.springframework.org/schema/context"
+               xmlns:aop="http://www.springframework.org/schema/aop"
+               xmlns:tx="http://www.springframework.org/schema/tx"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation=
+                       "http://www.springframework.org/schema/beans
+                       http://www.springframework.org/schema/beans/spring-beans.xsd
+                       http://www.springframework.org/schema/context
+                       http://www.springframework.org/schema/context/spring-context.xsd
+                       http://www.springframework.org/schema/aop
+                       http://www.springframework.org/schema/aop/spring-aop.xsd
+                       http://www.springframework.org/schema/tx
+                       http://www.springframework.org/schema/tx/spring-tx.xsd">
+        
+        </beans>
+        ```
+
+        
+
+    - 配置事务增强 
+
+        ```xml
+        <!--  配置平台事务管理  -->
+        <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+            <property name="dataSource" ref="dataSource"/>
+        </bean>
+        
+        <!--  事务管理器  -->
+        <tx:advice id="txAdvice" transaction-manager="transactionManager">
+            <tx:attributes>
+                <tx:method name="*"/>
+            </tx:attributes>
+        </tx:advice>
+        ```
+
+        - `<tx:method>`代表切点方法的事务参数的配置
+
+            ```xml
+            <tx:method name="transfer" isolation="REPEATABLE_READ" propagation="REQUIRED" timeout="-1" read-only="false"/>
+            ```
+
+            1. name：切点方法名称
+            2. isolation：事物的隔离级别
+            3. propagation：事物的传播行为
+            4. timeout：超时时间
+            5. read-only：是否只读
+
+2. 注解配置声明式事务控制解析
+
+    - 使用 `@Transactional`在需要进行事务控制的类或是方法上修饰，注解可用的属性同于xml 配置方式
+    - 注解使用在类上，那么该类下的所有方法都使用同一套注解参数配置
+    - 使用在方法上，不同的方法可以采用不同的事务参数配置
+    - XML配置文件中要开启事务的注解驱动`<tx:annotation-driven/>`
